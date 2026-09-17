@@ -24,9 +24,10 @@ pipeline {
             agent any
             steps {
                 sh '''
-                    docker run -d --name test-run-$BUILD_NUMBER -p 5001:5000 jenkins-test-app:$BUILD_NUMBER
+                    docker run -d --name test-run-$BUILD_NUMBER jenkins-test-app:$BUILD_NUMBER
                     sleep 3
-                    curl -f http://localhost:5001/health
+                    CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test-run-$BUILD_NUMBER)
+                    curl -f http://$CONTAINER_IP:5000/health
                     docker stop test-run-$BUILD_NUMBER
                     docker rm test-run-$BUILD_NUMBER
                 '''
